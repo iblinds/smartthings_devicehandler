@@ -168,7 +168,6 @@ def zwaveEvent(physicalgraph.zwave.Command cmd) {
 
 def on() {
 	
-		//	zwave.basicV1.basicSet(value: 0xFF).format()
            sendEvent(name: "level", value: 50, unit: "%")
 	      
            sendEvent(name: "switch", value: "on")
@@ -259,6 +258,5 @@ def refresh() {
        // zwave.switchBinaryV1.switchBinaryGet().format(),
         zwave.switchMultilevelV1.switchMultilevelGet().format(),
         zwave.batteryV1.batteryGet().format(),
-     //   zwave.basicV1.basicGet().format(),
     ], 3000)
 }
