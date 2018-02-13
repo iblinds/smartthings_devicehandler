@@ -5,7 +5,7 @@
  *  in compliance with the License. You may obtain a copy of the License at:
  *
  *      http://www.apache.org/licenses/LICENSE-2.0
- *
+ *  last update 2/12/18 - Eric B
  *  Unless required by applicable law or agreed to in writing, software distributed under the License is distributed
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
@@ -21,6 +21,7 @@ metadata {
         capability "Window Shade"   
 		capability "Refresh"
         capability "Battery"
+        capability "Configuration"
 	
 
 	//	fingerprint inClusters: "0x26"
@@ -49,11 +50,11 @@ metadata {
 	tiles(scale: 2) {
 		multiAttributeTile(name:"blind", type: "lighting", width: 6, height: 4, canChangeIcon: true, canChangeBackground: true){
 			tileAttribute ("device.windowShade", key: "PRIMARY_CONTROL") {
-                attributeState "unknown", label:'${name}', action:"refresh.refresh", icon:"http://myiblinds.com/icons/blind.png", backgroundColor:"#ffa81e"
-				attributeState "open", label:'${name}', action:"switch.off", icon:"http://myiblinds.com/icons/blind.png", backgroundColor:"#00B200", nextState:"closing"
-				attributeState "closed", label:'${name}', action:"switch.on", icon:"http://myiblinds.com/icons/blind.png", backgroundColor:"#ffffff", nextState:"opening"
-				attributeState "opening", label:'${name}', action:"switch.off", icon:"http://myiblinds.com/icons/blind.png", backgroundColor:"#00B200", nextState:"closing"
-				attributeState "closing", label:'${name}', action:"switch.on", icon:"http://myiblinds.com/icons/blind.png", backgroundColor:"#ffffff", nextState:"opening"
+                attributeState "set level", label:'${name}', action:"refresh.refresh", icon:"http://myiblinds.com/icons/blind2.png", backgroundColor:"#ffa81e"
+				attributeState "open", label:'${name}', action:"switch.off", icon:"http://myiblinds.com/icons/blind2.png", backgroundColor:"#00B200", nextState:"closing"
+				attributeState "closed", label:'${name}', action:"switch.on", icon:"http://myiblinds.com/icons/blind2.png", backgroundColor:"#ffffff", nextState:"opening"
+				attributeState "opening", label:'${name}', action:"switch.off", icon:"http://myiblinds.com/icons/blind2.png", backgroundColor:"#00B200", nextState:"closing"
+				attributeState "closing", label:'${name}', action:"switch.on", icon:"http://myiblinds.com/icons/blind2.png", backgroundColor:"#ffffff", nextState:"opening"
               
           //    attributeState("partially open", label:'stop/my', action:"presetPosition", icon:"st.doors.garage.garage-open", backgroundColor:"#ffcc33")
               
@@ -81,11 +82,14 @@ metadata {
 		standardTile("refresh", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
 			state "default", label:"Refresh", action:"refresh.refresh", icon:"st.secondary.refresh"
 		}
+        standardTile("config", "device.switch", width: 2, height: 2, inactiveLabel: false, decoration: "flat") {
+			state "default", label:'Calibrate', action:"configuration.configure" , icon:"st.custom.buttons.add-icon"
+		}
 
 
 
 		main(["blind"])
-	details(["blind", "levelval", "battery", "levelSliderControl",  "refresh"])
+	details(["blind", "levelval", "battery", "levelSliderControl",  "refresh","config"])
    
 
 	}
@@ -254,9 +258,25 @@ def poll() {
 
 def refresh() {
     log.trace "refresh(started)"
+    log.debug "Refresh Tile Pushed"
     delayBetween([
        // zwave.switchBinaryV1.switchBinaryGet().format(),
         zwave.switchMultilevelV1.switchMultilevelGet().format(),
         zwave.batteryV1.batteryGet().format(),
     ], 3000)
+}
+
+def configure() {
+
+     // Run Calibration 
+     
+        log.debug "Configuration tile pushed"
+    [
+       
+       zwave.configurationV2.configurationSet(parameterNumber: 199, size: 4, configurationValue: [0, 0, 0, 1]).format(),
+       zwave.configurationV2.configurationGet(parameterNumber: 199).format()
+    ]
+    
+
+    
 }
